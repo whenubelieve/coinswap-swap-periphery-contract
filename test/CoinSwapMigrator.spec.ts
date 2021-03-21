@@ -38,17 +38,17 @@ describe('CoinSwapMigrator', () => {
 
   it('migrate', async () => {
     const WBNBPartnerAmount = expandTo18Decimals(1)
-    const ETHAmount = expandTo18Decimals(4)
+    const BNBAmount = expandTo18Decimals(4)
     await WBNBPartner.approve(WBNBExchangeV1.address, MaxUint256)
     await WBNBExchangeV1.addLiquidity(bigNumberify(1), WBNBPartnerAmount, MaxUint256, {
       ...overrides,
-      value: ETHAmount
+      value: BNBAmount
     })
     await WBNBExchangeV1.approve(migrator.address, MaxUint256)
     const expectedLiquidity = expandTo18Decimals(2)
     const WBNBPairToken0 = await WBNBPair.token0()
     await expect(
-      migrator.migrate(WBNBPartner.address, WBNBPartnerAmount, ETHAmount, wallet.address, MaxUint256, overrides)
+      migrator.migrate(WBNBPartner.address, WBNBPartnerAmount, BNBAmount, wallet.address, MaxUint256, overrides)
     )
       .to.emit(WBNBPair, 'Transfer')
       .withArgs(AddressZero, AddressZero, MINIMUM_LIQUIDITY)
@@ -56,14 +56,14 @@ describe('CoinSwapMigrator', () => {
       .withArgs(AddressZero, wallet.address, expectedLiquidity.sub(MINIMUM_LIQUIDITY))
       .to.emit(WBNBPair, 'Sync')
       .withArgs(
-        WBNBPairToken0 === WBNBPartner.address ? WBNBPartnerAmount : ETHAmount,
-        WBNBPairToken0 === WBNBPartner.address ? ETHAmount : WBNBPartnerAmount
+        WBNBPairToken0 === WBNBPartner.address ? WBNBPartnerAmount : BNBAmount,
+        WBNBPairToken0 === WBNBPartner.address ? BNBAmount : WBNBPartnerAmount
       )
       .to.emit(WBNBPair, 'Mint')
       .withArgs(
         router.address,
-        WBNBPairToken0 === WBNBPartner.address ? WBNBPartnerAmount : ETHAmount,
-        WBNBPairToken0 === WBNBPartner.address ? ETHAmount : WBNBPartnerAmount
+        WBNBPairToken0 === WBNBPartner.address ? WBNBPartnerAmount : BNBAmount,
+        WBNBPairToken0 === WBNBPartner.address ? BNBAmount : WBNBPartnerAmount
       )
     expect(await WBNBPair.balanceOf(wallet.address)).to.eq(expectedLiquidity.sub(MINIMUM_LIQUIDITY))
   })

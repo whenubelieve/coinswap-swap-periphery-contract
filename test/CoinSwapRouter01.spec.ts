@@ -100,22 +100,22 @@ describe('CoinSwapRouter{01,02}', () => {
         expect(await pair.balanceOf(wallet.address)).to.eq(expectedLiquidity.sub(MINIMUM_LIQUIDITY))
       })
 
-      it('addLiquidityETH', async () => {
+      it('addLiquidityBNB', async () => {
         const WBNBPartnerAmount = expandTo18Decimals(1)
-        const ETHAmount = expandTo18Decimals(4)
+        const BNBAmount = expandTo18Decimals(4)
 
         const expectedLiquidity = expandTo18Decimals(2)
         const WBNBPairToken0 = await WBNBPair.token0()
         await WBNBPartner.approve(router.address, MaxUint256)
         await expect(
-          router.addLiquidityETH(
+          router.addLiquidityBNB(
             WBNBPartner.address,
             WBNBPartnerAmount,
             WBNBPartnerAmount,
-            ETHAmount,
+            BNBAmount,
             wallet.address,
             MaxUint256,
-            { ...overrides, value: ETHAmount }
+            { ...overrides, value: BNBAmount }
           )
         )
           .to.emit(WBNBPair, 'Transfer')
@@ -124,14 +124,14 @@ describe('CoinSwapRouter{01,02}', () => {
           .withArgs(AddressZero, wallet.address, expectedLiquidity.sub(MINIMUM_LIQUIDITY))
           .to.emit(WBNBPair, 'Sync')
           .withArgs(
-            WBNBPairToken0 === WBNBPartner.address ? WBNBPartnerAmount : ETHAmount,
-            WBNBPairToken0 === WBNBPartner.address ? ETHAmount : WBNBPartnerAmount
+            WBNBPairToken0 === WBNBPartner.address ? WBNBPartnerAmount : BNBAmount,
+            WBNBPairToken0 === WBNBPartner.address ? BNBAmount : WBNBPartnerAmount
           )
           .to.emit(WBNBPair, 'Mint')
           .withArgs(
             router.address,
-            WBNBPairToken0 === WBNBPartner.address ? WBNBPartnerAmount : ETHAmount,
-            WBNBPairToken0 === WBNBPartner.address ? ETHAmount : WBNBPartnerAmount
+            WBNBPairToken0 === WBNBPartner.address ? WBNBPartnerAmount : BNBAmount,
+            WBNBPairToken0 === WBNBPartner.address ? BNBAmount : WBNBPartnerAmount
           )
 
         expect(await WBNBPair.balanceOf(wallet.address)).to.eq(expectedLiquidity.sub(MINIMUM_LIQUIDITY))
@@ -181,19 +181,19 @@ describe('CoinSwapRouter{01,02}', () => {
         expect(await token1.balanceOf(wallet.address)).to.eq(totalSupplyToken1.sub(2000))
       })
 
-      it('removeLiquidityETH', async () => {
+      it('removeLiquidityBNB', async () => {
         const WBNBPartnerAmount = expandTo18Decimals(1)
-        const ETHAmount = expandTo18Decimals(4)
+        const BNBAmount = expandTo18Decimals(4)
         await WBNBPartner.transfer(WBNBPair.address, WBNBPartnerAmount)
-        await WBNB.deposit({ value: ETHAmount })
-        await WBNB.transfer(WBNBPair.address, ETHAmount)
+        await WBNB.deposit({ value: BNBAmount })
+        await WBNB.transfer(WBNBPair.address, BNBAmount)
         await WBNBPair.mint(wallet.address, overrides)
 
         const expectedLiquidity = expandTo18Decimals(2)
         const WBNBPairToken0 = await WBNBPair.token0()
         await WBNBPair.approve(router.address, MaxUint256)
         await expect(
-          router.removeLiquidityETH(
+          router.removeLiquidityBNB(
             WBNBPartner.address,
             expectedLiquidity.sub(MINIMUM_LIQUIDITY),
             0,
@@ -208,7 +208,7 @@ describe('CoinSwapRouter{01,02}', () => {
           .to.emit(WBNBPair, 'Transfer')
           .withArgs(WBNBPair.address, AddressZero, expectedLiquidity.sub(MINIMUM_LIQUIDITY))
           .to.emit(WBNB, 'Transfer')
-          .withArgs(WBNBPair.address, router.address, ETHAmount.sub(2000))
+          .withArgs(WBNBPair.address, router.address, BNBAmount.sub(2000))
           .to.emit(WBNBPartner, 'Transfer')
           .withArgs(WBNBPair.address, router.address, WBNBPartnerAmount.sub(500))
           .to.emit(WBNBPartner, 'Transfer')
@@ -221,8 +221,8 @@ describe('CoinSwapRouter{01,02}', () => {
           .to.emit(WBNBPair, 'Burn')
           .withArgs(
             router.address,
-            WBNBPairToken0 === WBNBPartner.address ? WBNBPartnerAmount.sub(500) : ETHAmount.sub(2000),
-            WBNBPairToken0 === WBNBPartner.address ? ETHAmount.sub(2000) : WBNBPartnerAmount.sub(500),
+            WBNBPairToken0 === WBNBPartner.address ? WBNBPartnerAmount.sub(500) : BNBAmount.sub(2000),
+            WBNBPairToken0 === WBNBPartner.address ? BNBAmount.sub(2000) : WBNBPartnerAmount.sub(500),
             router.address
           )
 
@@ -266,12 +266,12 @@ describe('CoinSwapRouter{01,02}', () => {
         )
       })
 
-      it('removeLiquidityETHWithPermit', async () => {
+      it('removeLiquidityBNBWithPermit', async () => {
         const WBNBPartnerAmount = expandTo18Decimals(1)
-        const ETHAmount = expandTo18Decimals(4)
+        const BNBAmount = expandTo18Decimals(4)
         await WBNBPartner.transfer(WBNBPair.address, WBNBPartnerAmount)
-        await WBNB.deposit({ value: ETHAmount })
-        await WBNB.transfer(WBNBPair.address, ETHAmount)
+        await WBNB.deposit({ value: BNBAmount })
+        await WBNB.transfer(WBNBPair.address, BNBAmount)
         await WBNBPair.mint(wallet.address, overrides)
 
         const expectedLiquidity = expandTo18Decimals(2)
@@ -286,7 +286,7 @@ describe('CoinSwapRouter{01,02}', () => {
 
         const { v, r, s } = ecsign(Buffer.from(digest.slice(2), 'hex'), Buffer.from(wallet.privateKey.slice(2), 'hex'))
 
-        await router.removeLiquidityETHWithPermit(
+        await router.removeLiquidityBNBWithPermit(
           WBNBPartner.address,
           expectedLiquidity.sub(MINIMUM_LIQUIDITY),
           0,
@@ -425,16 +425,16 @@ describe('CoinSwapRouter{01,02}', () => {
         })
       })
 
-      describe('swapExactETHForTokens', () => {
+      describe('swapExactBNBForTokens', () => {
         const WBNBPartnerAmount = expandTo18Decimals(10)
-        const ETHAmount = expandTo18Decimals(5)
+        const BNBAmount = expandTo18Decimals(5)
         const swapAmount = expandTo18Decimals(1)
         const expectedOutputAmount = bigNumberify('1662497915624478906')
 
         beforeEach(async () => {
           await WBNBPartner.transfer(WBNBPair.address, WBNBPartnerAmount)
-          await WBNB.deposit({ value: ETHAmount })
-          await WBNB.transfer(WBNBPair.address, ETHAmount)
+          await WBNB.deposit({ value: BNBAmount })
+          await WBNB.transfer(WBNBPair.address, BNBAmount)
           await WBNBPair.mint(wallet.address, overrides)
 
           await token0.approve(router.address, MaxUint256)
@@ -443,7 +443,7 @@ describe('CoinSwapRouter{01,02}', () => {
         it('happy path', async () => {
           const WBNBPairToken0 = await WBNBPair.token0()
           await expect(
-            router.swapExactETHForTokens(0, [WBNB.address, WBNBPartner.address], wallet.address, MaxUint256, {
+            router.swapExactBNBForTokens(0, [WBNB.address, WBNBPartner.address], wallet.address, MaxUint256, {
               ...overrides,
               value: swapAmount
             })
@@ -456,9 +456,9 @@ describe('CoinSwapRouter{01,02}', () => {
             .withArgs(
               WBNBPairToken0 === WBNBPartner.address
                 ? WBNBPartnerAmount.sub(expectedOutputAmount)
-                : ETHAmount.add(swapAmount),
+                : BNBAmount.add(swapAmount),
               WBNBPairToken0 === WBNBPartner.address
-                ? ETHAmount.add(swapAmount)
+                ? BNBAmount.add(swapAmount)
                 : WBNBPartnerAmount.sub(expectedOutputAmount)
             )
             .to.emit(WBNBPair, 'Swap')
@@ -474,7 +474,7 @@ describe('CoinSwapRouter{01,02}', () => {
 
         it('amounts', async () => {
           await expect(
-            routerEventEmitter.swapExactETHForTokens(
+            routerEventEmitter.swapExactBNBForTokens(
               router.address,
               0,
               [WBNB.address, WBNBPartner.address],
@@ -492,10 +492,10 @@ describe('CoinSwapRouter{01,02}', () => {
 
         it('gas', async () => {
           const WBNBPartnerAmount = expandTo18Decimals(10)
-          const ETHAmount = expandTo18Decimals(5)
+          const BNBAmount = expandTo18Decimals(5)
           await WBNBPartner.transfer(WBNBPair.address, WBNBPartnerAmount)
-          await WBNB.deposit({ value: ETHAmount })
-          await WBNB.transfer(WBNBPair.address, ETHAmount)
+          await WBNB.deposit({ value: BNBAmount })
+          await WBNB.transfer(WBNBPair.address, BNBAmount)
           await WBNBPair.mint(wallet.address, overrides)
 
           // ensure that setting price{0,1}CumulativeLast for the first time doesn't affect our gas math
@@ -504,7 +504,7 @@ describe('CoinSwapRouter{01,02}', () => {
 
           const swapAmount = expandTo18Decimals(1)
           await mineBlock(provider, (await provider.getBlock('latest')).timestamp + 1)
-          const tx = await router.swapExactETHForTokens(
+          const tx = await router.swapExactBNBForTokens(
             0,
             [WBNB.address, WBNBPartner.address],
             wallet.address,
@@ -524,16 +524,16 @@ describe('CoinSwapRouter{01,02}', () => {
         }).retries(3)
       })
 
-      describe('swapTokensForExactETH', () => {
+      describe('swapTokensForExactBNB', () => {
         const WBNBPartnerAmount = expandTo18Decimals(5)
-        const ETHAmount = expandTo18Decimals(10)
+        const BNBAmount = expandTo18Decimals(10)
         const expectedSwapAmount = bigNumberify('557227237267357629')
         const outputAmount = expandTo18Decimals(1)
 
         beforeEach(async () => {
           await WBNBPartner.transfer(WBNBPair.address, WBNBPartnerAmount)
-          await WBNB.deposit({ value: ETHAmount })
-          await WBNB.transfer(WBNBPair.address, ETHAmount)
+          await WBNB.deposit({ value: BNBAmount })
+          await WBNB.transfer(WBNBPair.address, BNBAmount)
           await WBNBPair.mint(wallet.address, overrides)
         })
 
@@ -541,7 +541,7 @@ describe('CoinSwapRouter{01,02}', () => {
           await WBNBPartner.approve(router.address, MaxUint256)
           const WBNBPairToken0 = await WBNBPair.token0()
           await expect(
-            router.swapTokensForExactETH(
+            router.swapTokensForExactBNB(
               outputAmount,
               MaxUint256,
               [WBNBPartner.address, WBNB.address],
@@ -558,9 +558,9 @@ describe('CoinSwapRouter{01,02}', () => {
             .withArgs(
               WBNBPairToken0 === WBNBPartner.address
                 ? WBNBPartnerAmount.add(expectedSwapAmount)
-                : ETHAmount.sub(outputAmount),
+                : BNBAmount.sub(outputAmount),
               WBNBPairToken0 === WBNBPartner.address
-                ? ETHAmount.sub(outputAmount)
+                ? BNBAmount.sub(outputAmount)
                 : WBNBPartnerAmount.add(expectedSwapAmount)
             )
             .to.emit(WBNBPair, 'Swap')
@@ -577,7 +577,7 @@ describe('CoinSwapRouter{01,02}', () => {
         it('amounts', async () => {
           await WBNBPartner.approve(routerEventEmitter.address, MaxUint256)
           await expect(
-            routerEventEmitter.swapTokensForExactETH(
+            routerEventEmitter.swapTokensForExactBNB(
               router.address,
               outputAmount,
               MaxUint256,
@@ -592,16 +592,16 @@ describe('CoinSwapRouter{01,02}', () => {
         })
       })
 
-      describe('swapExactTokensForETH', () => {
+      describe('swapExactTokensForBNB', () => {
         const WBNBPartnerAmount = expandTo18Decimals(5)
-        const ETHAmount = expandTo18Decimals(10)
+        const BNBAmount = expandTo18Decimals(10)
         const swapAmount = expandTo18Decimals(1)
         const expectedOutputAmount = bigNumberify('1662497915624478906')
 
         beforeEach(async () => {
           await WBNBPartner.transfer(WBNBPair.address, WBNBPartnerAmount)
-          await WBNB.deposit({ value: ETHAmount })
-          await WBNB.transfer(WBNBPair.address, ETHAmount)
+          await WBNB.deposit({ value: BNBAmount })
+          await WBNB.transfer(WBNBPair.address, BNBAmount)
           await WBNBPair.mint(wallet.address, overrides)
         })
 
@@ -609,7 +609,7 @@ describe('CoinSwapRouter{01,02}', () => {
           await WBNBPartner.approve(router.address, MaxUint256)
           const WBNBPairToken0 = await WBNBPair.token0()
           await expect(
-            router.swapExactTokensForETH(
+            router.swapExactTokensForBNB(
               swapAmount,
               0,
               [WBNBPartner.address, WBNB.address],
@@ -626,9 +626,9 @@ describe('CoinSwapRouter{01,02}', () => {
             .withArgs(
               WBNBPairToken0 === WBNBPartner.address
                 ? WBNBPartnerAmount.add(swapAmount)
-                : ETHAmount.sub(expectedOutputAmount),
+                : BNBAmount.sub(expectedOutputAmount),
               WBNBPairToken0 === WBNBPartner.address
-                ? ETHAmount.sub(expectedOutputAmount)
+                ? BNBAmount.sub(expectedOutputAmount)
                 : WBNBPartnerAmount.add(swapAmount)
             )
             .to.emit(WBNBPair, 'Swap')
@@ -645,7 +645,7 @@ describe('CoinSwapRouter{01,02}', () => {
         it('amounts', async () => {
           await WBNBPartner.approve(routerEventEmitter.address, MaxUint256)
           await expect(
-            routerEventEmitter.swapExactTokensForETH(
+            routerEventEmitter.swapExactTokensForBNB(
               router.address,
               swapAmount,
               0,
@@ -660,23 +660,23 @@ describe('CoinSwapRouter{01,02}', () => {
         })
       })
 
-      describe('swapETHForExactTokens', () => {
+      describe('swapBNBForExactTokens', () => {
         const WBNBPartnerAmount = expandTo18Decimals(10)
-        const ETHAmount = expandTo18Decimals(5)
+        const BNBAmount = expandTo18Decimals(5)
         const expectedSwapAmount = bigNumberify('557227237267357629')
         const outputAmount = expandTo18Decimals(1)
 
         beforeEach(async () => {
           await WBNBPartner.transfer(WBNBPair.address, WBNBPartnerAmount)
-          await WBNB.deposit({ value: ETHAmount })
-          await WBNB.transfer(WBNBPair.address, ETHAmount)
+          await WBNB.deposit({ value: BNBAmount })
+          await WBNB.transfer(WBNBPair.address, BNBAmount)
           await WBNBPair.mint(wallet.address, overrides)
         })
 
         it('happy path', async () => {
           const WBNBPairToken0 = await WBNBPair.token0()
           await expect(
-            router.swapETHForExactTokens(
+            router.swapBNBForExactTokens(
               outputAmount,
               [WBNB.address, WBNBPartner.address],
               wallet.address,
@@ -695,9 +695,9 @@ describe('CoinSwapRouter{01,02}', () => {
             .withArgs(
               WBNBPairToken0 === WBNBPartner.address
                 ? WBNBPartnerAmount.sub(outputAmount)
-                : ETHAmount.add(expectedSwapAmount),
+                : BNBAmount.add(expectedSwapAmount),
               WBNBPairToken0 === WBNBPartner.address
-                ? ETHAmount.add(expectedSwapAmount)
+                ? BNBAmount.add(expectedSwapAmount)
                 : WBNBPartnerAmount.sub(outputAmount)
             )
             .to.emit(WBNBPair, 'Swap')
@@ -713,7 +713,7 @@ describe('CoinSwapRouter{01,02}', () => {
 
         it('amounts', async () => {
           await expect(
-            routerEventEmitter.swapETHForExactTokens(
+            routerEventEmitter.swapBNBForExactTokens(
               router.address,
               outputAmount,
               [WBNB.address, WBNBPartner.address],

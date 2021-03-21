@@ -46,27 +46,27 @@ describe('ExampleFlashSwap', () => {
   })
 
   it('coinswapCall:0', async () => {
-    // add liquidity to V1 at a rate of 1 ETH / 200 X
+    // add liquidity to V1 at a rate of 1 BNB / 200 X
     const WBNBPartnerAmountV1 = expandTo18Decimals(2000)
-    const ETHAmountV1 = expandTo18Decimals(10)
+    const BNBAmountV1 = expandTo18Decimals(10)
     await WBNBPartner.approve(WBNBExchangeV1.address, WBNBPartnerAmountV1)
     await WBNBExchangeV1.addLiquidity(bigNumberify(1), WBNBPartnerAmountV1, MaxUint256, {
       ...overrides,
-      value: ETHAmountV1
+      value: BNBAmountV1
     })
 
-    // add liquidity to V2 at a rate of 1 ETH / 100 X
+    // add liquidity to V2 at a rate of 1 BNB / 100 X
     const WBNBPartnerAmountV2 = expandTo18Decimals(1000)
-    const ETHAmountV2 = expandTo18Decimals(10)
+    const BNBAmountV2 = expandTo18Decimals(10)
     await WBNBPartner.transfer(WBNBPair.address, WBNBPartnerAmountV2)
-    await WBNB.deposit({ value: ETHAmountV2 })
-    await WBNB.transfer(WBNBPair.address, ETHAmountV2)
+    await WBNB.deposit({ value: BNBAmountV2 })
+    await WBNB.transfer(WBNBPair.address, BNBAmountV2)
     await WBNBPair.mint(wallet.address, overrides)
 
     const balanceBefore = await WBNBPartner.balanceOf(wallet.address)
 
     // now, execute arbitrage via coinswapCall:
-    // receive 1 ETH from V2, get as much X from V1 as we can, repay V2 with minimum X, keep the rest!
+    // receive 1 BNB from V2, get as much X from V1 as we can, repay V2 with minimum X, keep the rest!
     const arbitrageAmount = expandTo18Decimals(1)
     // instead of being 'hard-coded', the above value could be calculated optimally off-chain. this would be
     // better, but it'd be better yet to calculate the amount at runtime, on-chain. unfortunately, this requires a
@@ -99,27 +99,27 @@ describe('ExampleFlashSwap', () => {
   })
 
   it('coinswapCall:1', async () => {
-    // add liquidity to V1 at a rate of 1 ETH / 100 X
+    // add liquidity to V1 at a rate of 1 BNB / 100 X
     const WBNBPartnerAmountV1 = expandTo18Decimals(1000)
-    const ETHAmountV1 = expandTo18Decimals(10)
+    const BNBAmountV1 = expandTo18Decimals(10)
     await WBNBPartner.approve(WBNBExchangeV1.address, WBNBPartnerAmountV1)
     await WBNBExchangeV1.addLiquidity(bigNumberify(1), WBNBPartnerAmountV1, MaxUint256, {
       ...overrides,
-      value: ETHAmountV1
+      value: BNBAmountV1
     })
 
-    // add liquidity to V2 at a rate of 1 ETH / 200 X
+    // add liquidity to V2 at a rate of 1 BNB / 200 X
     const WBNBPartnerAmountV2 = expandTo18Decimals(2000)
-    const ETHAmountV2 = expandTo18Decimals(10)
+    const BNBAmountV2 = expandTo18Decimals(10)
     await WBNBPartner.transfer(WBNBPair.address, WBNBPartnerAmountV2)
-    await WBNB.deposit({ value: ETHAmountV2 })
-    await WBNB.transfer(WBNBPair.address, ETHAmountV2)
+    await WBNB.deposit({ value: BNBAmountV2 })
+    await WBNB.transfer(WBNBPair.address, BNBAmountV2)
     await WBNBPair.mint(wallet.address, overrides)
 
     const balanceBefore = await provider.getBalance(wallet.address)
 
     // now, execute arbitrage via coinswapCall:
-    // receive 200 X from V2, get as much ETH from V1 as we can, repay V2 with minimum ETH, keep the rest!
+    // receive 200 X from V2, get as much BNB from V1 as we can, repay V2 with minimum BNB, keep the rest!
     const arbitrageAmount = expandTo18Decimals(200)
     // instead of being 'hard-coded', the above value could be calculated optimally off-chain. this would be
     // better, but it'd be better yet to calculate the amount at runtime, on-chain. unfortunately, this requires a
@@ -146,7 +146,7 @@ describe('ExampleFlashSwap', () => {
     const priceV2 =
       WBNBPairToken0 === WBNBPartner.address ? reservesV2[0].div(reservesV2[1]) : reservesV2[1].div(reservesV2[0])
 
-    expect(formatEther(profit)).to.eq('0.548043441089763649') // our profit is ~.5 ETH
+    expect(formatEther(profit)).to.eq('0.548043441089763649') // our profit is ~.5 BNB
     expect(priceV1.toString()).to.eq('143') // we pushed the v1 price up to ~143
     expect(priceV2.toString()).to.eq('161') // we pushed the v2 price down to ~161
   })

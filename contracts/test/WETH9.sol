@@ -16,7 +16,7 @@
 pragma solidity =0.6.6;
 
 contract WBNB9 {
-    string public name     = "Wrapped Ether";
+    string public name     = "Wrapped BNB";
     string public symbol   = "WBNB";
     uint8  public decimals = 18;
 

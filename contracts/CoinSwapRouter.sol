@@ -25,7 +25,7 @@ contract CoinSwapRouter is ICoinSwapRouter02 {
     }
 
     receive() external payable {
-        assert(msg.sender == WBNB); // only accept ETH via fallback from the WBNB contract
+        assert(msg.sender == WBNB); // only accept BNB via fallback from the WBNB contract
     }
 
     // **** ADD LIQUIDITY ****
@@ -73,29 +73,29 @@ contract CoinSwapRouter is ICoinSwapRouter02 {
         TransferHelper.safeTransferFrom(tokenB, msg.sender, pair, amountB);
         liquidity = ICoinSwapPair(pair).mint(to);
     }
-    function addLiquidityETH(
+    function addLiquidityBNB(
         address token,
         uint amountTokenDesired,
         uint amountTokenMin,
-        uint amountETHMin,
+        uint amountBNBMin,
         address to,
         uint deadline
-    ) external virtual override payable ensure(deadline) returns (uint amountToken, uint amountETH, uint liquidity) {
-        (amountToken, amountETH) = _addLiquidity(
+    ) external virtual override payable ensure(deadline) returns (uint amountToken, uint amountBNB, uint liquidity) {
+        (amountToken, amountBNB) = _addLiquidity(
             token,
             WBNB,
             amountTokenDesired,
             msg.value,
             amountTokenMin,
-            amountETHMin
+            amountBNBMin
         );
         address pair = CoinSwapLibrary.pairFor(factory, token, WBNB);
         TransferHelper.safeTransferFrom(token, msg.sender, pair, amountToken);
-        IWBNB(WBNB).deposit{value: amountETH}();
-        assert(IWBNB(WBNB).transfer(pair, amountETH));
+        IWBNB(WBNB).deposit{value: amountBNB}();
+        assert(IWBNB(WBNB).transfer(pair, amountBNB));
         liquidity = ICoinSwapPair(pair).mint(to);
-        // refund dust eth, if any
-        if (msg.value > amountETH) TransferHelper.safeTransferETH(msg.sender, msg.value - amountETH);
+        // refund dust BNB, if any
+        if (msg.value > amountBNB) TransferHelper.safeTransferBNB(msg.sender, msg.value - amountBNB);
     }
 
     // **** REMOVE LIQUIDITY ****
@@ -116,26 +116,26 @@ contract CoinSwapRouter is ICoinSwapRouter02 {
         require(amountA >= amountAMin, 'CoinSwapRouter: INSUFFICIENT_A_AMOUNT');
         require(amountB >= amountBMin, 'CoinSwapRouter: INSUFFICIENT_B_AMOUNT');
     }
-    function removeLiquidityETH(
+    function removeLiquidityBNB(
         address token,
         uint liquidity,
         uint amountTokenMin,
-        uint amountETHMin,
+        uint amountBNBMin,
         address to,
         uint deadline
-    ) public virtual override ensure(deadline) returns (uint amountToken, uint amountETH) {
-        (amountToken, amountETH) = removeLiquidity(
+    ) public virtual override ensure(deadline) returns (uint amountToken, uint amountBNB) {
+        (amountToken, amountBNB) = removeLiquidity(
             token,
             WBNB,
             liquidity,
             amountTokenMin,
-            amountETHMin,
+            amountBNBMin,
             address(this),
             deadline
         );
         TransferHelper.safeTransfer(token, to, amountToken);
-        IWBNB(WBNB).withdraw(amountETH);
-        TransferHelper.safeTransferETH(to, amountETH);
+        IWBNB(WBNB).withdraw(amountBNB);
+        TransferHelper.safeTransferBNB(to, amountBNB);
     }
     function removeLiquidityWithPermit(
         address tokenA,
@@ -152,57 +152,57 @@ contract CoinSwapRouter is ICoinSwapRouter02 {
         ICoinSwapPair(pair).permit(msg.sender, address(this), value, deadline, v, r, s);
         (amountA, amountB) = removeLiquidity(tokenA, tokenB, liquidity, amountAMin, amountBMin, to, deadline);
     }
-    function removeLiquidityETHWithPermit(
+    function removeLiquidityBNBWithPermit(
         address token,
         uint liquidity,
         uint amountTokenMin,
-        uint amountETHMin,
+        uint amountBNBMin,
         address to,
         uint deadline,
         bool approveMax, uint8 v, bytes32 r, bytes32 s
-    ) external virtual override returns (uint amountToken, uint amountETH) {
+    ) external virtual override returns (uint amountToken, uint amountBNB) {
         address pair = CoinSwapLibrary.pairFor(factory, token, WBNB);
         uint value = approveMax ? uint(-1) : liquidity;
         ICoinSwapPair(pair).permit(msg.sender, address(this), value, deadline, v, r, s);
-        (amountToken, amountETH) = removeLiquidityETH(token, liquidity, amountTokenMin, amountETHMin, to, deadline);
+        (amountToken, amountBNB) = removeLiquidityBNB(token, liquidity, amountTokenMin, amountBNBMin, to, deadline);
     }
 
     // **** REMOVE LIQUIDITY (supporting fee-on-transfer tokens) ****
-    function removeLiquidityETHSupportingFeeOnTransferTokens(
+    function removeLiquidityBNBSupportingFeeOnTransferTokens(
         address token,
         uint liquidity,
         uint amountTokenMin,
-        uint amountETHMin,
+        uint amountBNBMin,
         address to,
         uint deadline
-    ) public virtual override ensure(deadline) returns (uint amountETH) {
-        (, amountETH) = removeLiquidity(
+    ) public virtual override ensure(deadline) returns (uint amountBNB) {
+        (, amountBNB) = removeLiquidity(
             token,
             WBNB,
             liquidity,
             amountTokenMin,
-            amountETHMin,
+            amountBNBMin,
             address(this),
             deadline
         );
         TransferHelper.safeTransfer(token, to, IERC20(token).balanceOf(address(this)));
-        IWBNB(WBNB).withdraw(amountETH);
-        TransferHelper.safeTransferETH(to, amountETH);
+        IWBNB(WBNB).withdraw(amountBNB);
+        TransferHelper.safeTransferBNB(to, amountBNB);
     }
-    function removeLiquidityETHWithPermitSupportingFeeOnTransferTokens(
+    function removeLiquidityBNBWithPermitSupportingFeeOnTransferTokens(
         address token,
         uint liquidity,
         uint amountTokenMin,
-        uint amountETHMin,
+        uint amountBNBMin,
         address to,
         uint deadline,
         bool approveMax, uint8 v, bytes32 r, bytes32 s
-    ) external virtual override returns (uint amountETH) {
+    ) external virtual override returns (uint amountBNB) {
         address pair = CoinSwapLibrary.pairFor(factory, token, WBNB);
         uint value = approveMax ? uint(-1) : liquidity;
         ICoinSwapPair(pair).permit(msg.sender, address(this), value, deadline, v, r, s);
-        amountETH = removeLiquidityETHSupportingFeeOnTransferTokens(
-            token, liquidity, amountTokenMin, amountETHMin, to, deadline
+        amountBNB = removeLiquidityBNBSupportingFeeOnTransferTokens(
+            token, liquidity, amountTokenMin, amountBNBMin, to, deadline
         );
     }
 
@@ -248,7 +248,7 @@ contract CoinSwapRouter is ICoinSwapRouter02 {
         );
         _swap(amounts, path, to);
     }
-    function swapExactETHForTokens(uint amountOutMin, address[] calldata path, address to, uint deadline)
+    function swapExactBNBForTokens(uint amountOutMin, address[] calldata path, address to, uint deadline)
         external
         virtual
         override
@@ -263,7 +263,7 @@ contract CoinSwapRouter is ICoinSwapRouter02 {
         assert(IWBNB(WBNB).transfer(CoinSwapLibrary.pairFor(factory, path[0], path[1]), amounts[0]));
         _swap(amounts, path, to);
     }
-    function swapTokensForExactETH(uint amountOut, uint amountInMax, address[] calldata path, address to, uint deadline)
+    function swapTokensForExactBNB(uint amountOut, uint amountInMax, address[] calldata path, address to, uint deadline)
         external
         virtual
         override
@@ -278,9 +278,9 @@ contract CoinSwapRouter is ICoinSwapRouter02 {
         );
         _swap(amounts, path, address(this));
         IWBNB(WBNB).withdraw(amounts[amounts.length - 1]);
-        TransferHelper.safeTransferETH(to, amounts[amounts.length - 1]);
+        TransferHelper.safeTransferBNB(to, amounts[amounts.length - 1]);
     }
-    function swapExactTokensForETH(uint amountIn, uint amountOutMin, address[] calldata path, address to, uint deadline)
+    function swapExactTokensForBNB(uint amountIn, uint amountOutMin, address[] calldata path, address to, uint deadline)
         external
         virtual
         override
@@ -295,9 +295,9 @@ contract CoinSwapRouter is ICoinSwapRouter02 {
         );
         _swap(amounts, path, address(this));
         IWBNB(WBNB).withdraw(amounts[amounts.length - 1]);
-        TransferHelper.safeTransferETH(to, amounts[amounts.length - 1]);
+        TransferHelper.safeTransferBNB(to, amounts[amounts.length - 1]);
     }
-    function swapETHForExactTokens(uint amountOut, address[] calldata path, address to, uint deadline)
+    function swapBNBForExactTokens(uint amountOut, address[] calldata path, address to, uint deadline)
         external
         virtual
         override
@@ -311,8 +311,8 @@ contract CoinSwapRouter is ICoinSwapRouter02 {
         IWBNB(WBNB).deposit{value: amounts[0]}();
         assert(IWBNB(WBNB).transfer(CoinSwapLibrary.pairFor(factory, path[0], path[1]), amounts[0]));
         _swap(amounts, path, to);
-        // refund dust eth, if any
-        if (msg.value > amounts[0]) TransferHelper.safeTransferETH(msg.sender, msg.value - amounts[0]);
+        // refund dust BNB, if any
+        if (msg.value > amounts[0]) TransferHelper.safeTransferBNB(msg.sender, msg.value - amounts[0]);
     }
 
     // **** SWAP (supporting fee-on-transfer tokens) ****
@@ -352,7 +352,7 @@ contract CoinSwapRouter is ICoinSwapRouter02 {
             'CoinSwapRouter: INSUFFICIENT_OUTPUT_AMOUNT'
         );
     }
-    function swapExactETHForTokensSupportingFeeOnTransferTokens(
+    function swapExactBNBForTokensSupportingFeeOnTransferTokens(
         uint amountOutMin,
         address[] calldata path,
         address to,
@@ -375,7 +375,7 @@ contract CoinSwapRouter is ICoinSwapRouter02 {
             'CoinSwapRouter: INSUFFICIENT_OUTPUT_AMOUNT'
         );
     }
-    function swapExactTokensForETHSupportingFeeOnTransferTokens(
+    function swapExactTokensForBNBSupportingFeeOnTransferTokens(
         uint amountIn,
         uint amountOutMin,
         address[] calldata path,
@@ -395,7 +395,7 @@ contract CoinSwapRouter is ICoinSwapRouter02 {
         uint amountOut = IERC20(WBNB).balanceOf(address(this));
         require(amountOut >= amountOutMin, 'CoinSwapRouter: INSUFFICIENT_OUTPUT_AMOUNT');
         IWBNB(WBNB).withdraw(amountOut);
-        TransferHelper.safeTransferETH(to, amountOut);
+        TransferHelper.safeTransferBNB(to, amountOut);
     }
 
     // **** LIBRARY FUNCTIONS ****
