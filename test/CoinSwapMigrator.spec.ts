@@ -22,49 +22,49 @@ describe('CoinSwapMigrator', () => {
   const [wallet] = provider.getWallets()
   const loadFixture = createFixtureLoader(provider, [wallet])
 
-  let WETHPartner: Contract
-  let WETHPair: Contract
+  let WBNBPartner: Contract
+  let WBNBPair: Contract
   let router: Contract
   let migrator: Contract
-  let WETHExchangeV1: Contract
+  let WBNBExchangeV1: Contract
   beforeEach(async function() {
     const fixture = await loadFixture(v2Fixture)
-    WETHPartner = fixture.WETHPartner
-    WETHPair = fixture.WETHPair
+    WBNBPartner = fixture.WBNBPartner
+    WBNBPair = fixture.WBNBPair
     router = fixture.router01 // we used router01 for this contract
     migrator = fixture.migrator
-    WETHExchangeV1 = fixture.WETHExchangeV1
+    WBNBExchangeV1 = fixture.WBNBExchangeV1
   })
 
   it('migrate', async () => {
-    const WETHPartnerAmount = expandTo18Decimals(1)
+    const WBNBPartnerAmount = expandTo18Decimals(1)
     const ETHAmount = expandTo18Decimals(4)
-    await WETHPartner.approve(WETHExchangeV1.address, MaxUint256)
-    await WETHExchangeV1.addLiquidity(bigNumberify(1), WETHPartnerAmount, MaxUint256, {
+    await WBNBPartner.approve(WBNBExchangeV1.address, MaxUint256)
+    await WBNBExchangeV1.addLiquidity(bigNumberify(1), WBNBPartnerAmount, MaxUint256, {
       ...overrides,
       value: ETHAmount
     })
-    await WETHExchangeV1.approve(migrator.address, MaxUint256)
+    await WBNBExchangeV1.approve(migrator.address, MaxUint256)
     const expectedLiquidity = expandTo18Decimals(2)
-    const WETHPairToken0 = await WETHPair.token0()
+    const WBNBPairToken0 = await WBNBPair.token0()
     await expect(
-      migrator.migrate(WETHPartner.address, WETHPartnerAmount, ETHAmount, wallet.address, MaxUint256, overrides)
+      migrator.migrate(WBNBPartner.address, WBNBPartnerAmount, ETHAmount, wallet.address, MaxUint256, overrides)
     )
-      .to.emit(WETHPair, 'Transfer')
+      .to.emit(WBNBPair, 'Transfer')
       .withArgs(AddressZero, AddressZero, MINIMUM_LIQUIDITY)
-      .to.emit(WETHPair, 'Transfer')
+      .to.emit(WBNBPair, 'Transfer')
       .withArgs(AddressZero, wallet.address, expectedLiquidity.sub(MINIMUM_LIQUIDITY))
-      .to.emit(WETHPair, 'Sync')
+      .to.emit(WBNBPair, 'Sync')
       .withArgs(
-        WETHPairToken0 === WETHPartner.address ? WETHPartnerAmount : ETHAmount,
-        WETHPairToken0 === WETHPartner.address ? ETHAmount : WETHPartnerAmount
+        WBNBPairToken0 === WBNBPartner.address ? WBNBPartnerAmount : ETHAmount,
+        WBNBPairToken0 === WBNBPartner.address ? ETHAmount : WBNBPartnerAmount
       )
-      .to.emit(WETHPair, 'Mint')
+      .to.emit(WBNBPair, 'Mint')
       .withArgs(
         router.address,
-        WETHPairToken0 === WETHPartner.address ? WETHPartnerAmount : ETHAmount,
-        WETHPairToken0 === WETHPartner.address ? ETHAmount : WETHPartnerAmount
+        WBNBPairToken0 === WBNBPartner.address ? WBNBPartnerAmount : ETHAmount,
+        WBNBPairToken0 === WBNBPartner.address ? ETHAmount : WBNBPartnerAmount
       )
-    expect(await WETHPair.balanceOf(wallet.address)).to.eq(expectedLiquidity.sub(MINIMUM_LIQUIDITY))
+    expect(await WBNBPair.balanceOf(wallet.address)).to.eq(expectedLiquidity.sub(MINIMUM_LIQUIDITY))
   })
 })
