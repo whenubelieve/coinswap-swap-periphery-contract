@@ -4,7 +4,7 @@ import './interfaces/ICoinSwapFactory.sol';
 import './libraries/TransferHelper.sol';
 import './libraries/CoinSwapLibrary.sol';
 import './interfaces/ICoinSwapRouter01.sol';
-import './interfaces/IERC20.sol';
+import './interfaces/IBEP20.sol';
 import './interfaces/IWBNB.sol';
 
 contract CoinSwapRouter01 is ICoinSwapRouter01 {

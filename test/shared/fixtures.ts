@@ -7,7 +7,7 @@ import { expandTo18Decimals } from './utilities'
 import CoinSwapFactory from '@uniswap/v2-core/build/CoinSwapFactory.json'
 import ICoinSwapPair from '@uniswap/v2-core/build/ICoinSwapPair.json'
 
-import ERC20 from '../../build/ERC20.json'
+import BEP20 from '../../build/BEP20.json'
 import WBNB9 from '../../build/WBNB9.json'
 import CoinSwapExchange from '../../build/CoinSwapExchange.json'
 import CoinSwapFactory from '../../build/CoinSwapFactory.json'
@@ -39,10 +39,10 @@ interface V2Fixture {
 
 export async function v2Fixture(provider: Web3Provider, [wallet]: Wallet[]): Promise<V2Fixture> {
   // deploy tokens
-  const tokenA = await deployContract(wallet, ERC20, [expandTo18Decimals(10000)])
-  const tokenB = await deployContract(wallet, ERC20, [expandTo18Decimals(10000)])
+  const tokenA = await deployContract(wallet, BEP20, [expandTo18Decimals(10000)])
+  const tokenB = await deployContract(wallet, BEP20, [expandTo18Decimals(10000)])
   const WBNB = await deployContract(wallet, WBNB9)
-  const WBNBPartner = await deployContract(wallet, ERC20, [expandTo18Decimals(10000)])
+  const WBNBPartner = await deployContract(wallet, BEP20, [expandTo18Decimals(10000)])
 
   // deploy V1
   const factoryV1 = await deployContract(wallet, CoinSwapFactory, [])

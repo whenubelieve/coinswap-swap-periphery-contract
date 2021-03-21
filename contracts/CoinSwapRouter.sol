@@ -5,7 +5,7 @@ import './libraries/TransferHelper.sol';
 import './interfaces/ICoinSwapRouter02.sol';
 import './libraries/CoinSwapLibrary.sol';
 import './libraries/SafeMath.sol';
-import './interfaces/IERC20.sol';
+import './interfaces/IBEP20.sol';
 import './interfaces/IWBNB.sol';
 
 contract CoinSwapRouter is ICoinSwapRouter02 {
@@ -185,7 +185,7 @@ contract CoinSwapRouter is ICoinSwapRouter02 {
             address(this),
             deadline
         );
-        TransferHelper.safeTransfer(token, to, IERC20(token).balanceOf(address(this)));
+        TransferHelper.safeTransfer(token, to, IBEP20(token).balanceOf(address(this)));
         IWBNB(WBNB).withdraw(amountBNB);
         TransferHelper.safeTransferBNB(to, amountBNB);
     }
@@ -327,7 +327,7 @@ contract CoinSwapRouter is ICoinSwapRouter02 {
             { // scope to avoid stack too deep errors
             (uint reserve0, uint reserve1,) = pair.getReserves();
             (uint reserveInput, uint reserveOutput) = input == token0 ? (reserve0, reserve1) : (reserve1, reserve0);
-            amountInput = IERC20(input).balanceOf(address(pair)).sub(reserveInput);
+            amountInput = IBEP20(input).balanceOf(address(pair)).sub(reserveInput);
             amountOutput = CoinSwapLibrary.getAmountOut(amountInput, reserveInput, reserveOutput);
             }
             (uint amount0Out, uint amount1Out) = input == token0 ? (uint(0), amountOutput) : (amountOutput, uint(0));
@@ -345,10 +345,10 @@ contract CoinSwapRouter is ICoinSwapRouter02 {
         TransferHelper.safeTransferFrom(
             path[0], msg.sender, CoinSwapLibrary.pairFor(factory, path[0], path[1]), amountIn
         );
-        uint balanceBefore = IERC20(path[path.length - 1]).balanceOf(to);
+        uint balanceBefore = IBEP20(path[path.length - 1]).balanceOf(to);
         _swapSupportingFeeOnTransferTokens(path, to);
         require(
-            IERC20(path[path.length - 1]).balanceOf(to).sub(balanceBefore) >= amountOutMin,
+            IBEP20(path[path.length - 1]).balanceOf(to).sub(balanceBefore) >= amountOutMin,
             'CoinSwapRouter: INSUFFICIENT_OUTPUT_AMOUNT'
         );
     }
@@ -368,10 +368,10 @@ contract CoinSwapRouter is ICoinSwapRouter02 {
         uint amountIn = msg.value;
         IWBNB(WBNB).deposit{value: amountIn}();
         assert(IWBNB(WBNB).transfer(CoinSwapLibrary.pairFor(factory, path[0], path[1]), amountIn));
-        uint balanceBefore = IERC20(path[path.length - 1]).balanceOf(to);
+        uint balanceBefore = IBEP20(path[path.length - 1]).balanceOf(to);
         _swapSupportingFeeOnTransferTokens(path, to);
         require(
-            IERC20(path[path.length - 1]).balanceOf(to).sub(balanceBefore) >= amountOutMin,
+            IBEP20(path[path.length - 1]).balanceOf(to).sub(balanceBefore) >= amountOutMin,
             'CoinSwapRouter: INSUFFICIENT_OUTPUT_AMOUNT'
         );
     }
@@ -392,7 +392,7 @@ contract CoinSwapRouter is ICoinSwapRouter02 {
             path[0], msg.sender, CoinSwapLibrary.pairFor(factory, path[0], path[1]), amountIn
         );
         _swapSupportingFeeOnTransferTokens(path, address(this));
-        uint amountOut = IERC20(WBNB).balanceOf(address(this));
+        uint amountOut = IBEP20(WBNB).balanceOf(address(this));
         require(amountOut >= amountOutMin, 'CoinSwapRouter: INSUFFICIENT_OUTPUT_AMOUNT');
         IWBNB(WBNB).withdraw(amountOut);
         TransferHelper.safeTransferBNB(to, amountOut);

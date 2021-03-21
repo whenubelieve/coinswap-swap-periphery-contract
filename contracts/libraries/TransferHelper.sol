@@ -2,7 +2,7 @@
 
 pragma solidity >=0.6.0;
 
-// helper methods for interacting with ERC20 tokens and sending BNB that do not consistently return true/false
+// helper methods for interacting with BEP20 tokens and sending BNB that do not consistently return true/false
 library TransferHelper {
     function safeApprove(
         address token,
