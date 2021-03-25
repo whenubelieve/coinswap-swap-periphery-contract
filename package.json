@@ -1,6 +1,6 @@
 {
   "name": "@coinswap-libs/periphery",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Peripheral smart contracts for interacting with CoinSwap",
   "engines": {
     "node": ">=10"
