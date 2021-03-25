@@ -1,6 +1,6 @@
 {
-  "name": "swap-periphery",
-  "version": "1.1.0-beta.0",
+  "name": "@coinswap-libs/periphery",
+  "version": "0.0.1",
   "description": "Peripheral smart contracts for interacting with CoinSwap",
   "engines": {
     "node": ">=10"
@@ -41,8 +41,7 @@
     "compile": "waffle .waffle.json",
     "postcompile": "yarn copy-v1-artifacts",
     "pretest": "yarn compile",
-    "test": "mocha",
-    "prepublishOnly": "yarn test"
+    "test": "mocha"
   },
   "license": "GPL-3.0-or-later",
   "main": "index.js"
